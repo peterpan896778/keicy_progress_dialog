@@ -6,7 +6,14 @@ import 'package:flutter/material.dart';
 class KeicyProgressDialog {
   ProgressDialog dlg;
 
-  KeicyProgressDialog(BuildContext context, {String message, double width, double borderRadius, Color backgroundColor, double indicatorSize}) {
+  KeicyProgressDialog(
+    BuildContext context, {
+    String message = "Please wait.....",
+    double width = 100.0,
+    double borderRadius = 5.0,
+    Color backgroundColor = Colors.white,
+    double indicatorSize = 30.0,
+  }) {
     dlg = new ProgressDialog(context, type: ProgressDialogType.Normal);
     dlg.style(
       width: width,
