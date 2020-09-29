@@ -3,139 +3,142 @@ library keicy_progress_dialog;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+enum ProgressDialogType { Normal, Download }
+enum Layout { Row, Column }
+
+BuildContext _context, _dismissingContext;
+bool _barrierDismissible = true, _showLogs = false;
+ProgressDialogType _progressDialogType = ProgressDialogType.Normal;
+Layout _layout = Layout.Row;
+Color _backgroundColor = Colors.white;
+double _dialogElevation = 8.0, _borderRadius = 8.0;
+Curve _insetAnimCurve = Curves.easeInOut;
+double _width;
+double _height;
+String _dialogMessage = "Please wait .....";
+double _progress = 0.0;
+double _maxProgress = 100.0;
+EdgeInsetsGeometry _padding = EdgeInsets.all(15);
+double _spacing = 20.0;
+double _indicatorSize = 20;
+Widget _progressWidget = Container(
+  width: _indicatorSize,
+  height: _indicatorSize,
+  child: CupertinoActivityIndicator(
+    radius: _indicatorSize / 2,
+  ),
+);
+TextStyle _progressTextStyle = TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w400);
+TextStyle _messageStyle = TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.w600);
+
+bool _isShowing = false;
+
 class KeicyProgressDialog {
-  ProgressDialog dlg;
+  _Body _dialog;
 
   KeicyProgressDialog(
     BuildContext context, {
-    String message = "Please wait.....",
-    double width = 100.0,
-    double borderRadius = 5.0,
-    Color backgroundColor = Colors.white,
-    double indicatorSize = 30.0,
+    bool isDismissible,
+    bool showLogs,
+    ProgressDialogType type,
+    Layout layout,
+    Color backgroundColor,
+    double borderRadius,
+    double elevation,
+    Curve insetAnimCurve,
+    double width,
+    double height,
+    String message,
+    double progress,
+    double maxProgress,
+    EdgeInsetsGeometry padding,
+    double spacing,
+    double indicatorSize,
+    Widget progressWidget,
+    TextStyle progressTextStyle,
+    TextStyle messageTextStyle,
   }) {
-    dlg = new ProgressDialog(context, type: ProgressDialogType.Normal);
-    dlg.style(
-      width: width,
-      height: indicatorSize * 2.5,
-      indicatorSize: indicatorSize,
-      message: message,
-      borderRadius: borderRadius,
-      backgroundColor: backgroundColor,
-      progressWidget: Container(
-        width: indicatorSize,
-        height: indicatorSize,
-        child: CupertinoActivityIndicator(
-          radius: indicatorSize / 2,
-        ),
-      ),
-      elevation: 10.0,
-      insetAnimCurve: Curves.easeInOut,
-      progressTextStyle: TextStyle(color: Colors.black, fontSize: 20.0),
-      messageTextStyle: TextStyle(color: Colors.black, fontSize: 20.0),
-    );
+    _context = context;
+    _barrierDismissible = isDismissible ?? true;
+    _showLogs = showLogs ?? false;
+    _progressDialogType = type ?? _progressDialogType;
+    _layout = layout ?? _layout;
+
+    if (_isShowing) return;
+
+    _backgroundColor = backgroundColor ?? _backgroundColor;
+    _borderRadius = borderRadius ?? _borderRadius;
+    _dialogElevation = elevation ?? _dialogElevation;
+    _insetAnimCurve = insetAnimCurve ?? _insetAnimCurve;
+    _dialogMessage = message ?? _dialogMessage;
+    _width = width ?? _width;
+    _height = height ?? _height;
+    if (_progressDialogType == ProgressDialogType.Download) {
+      _progress = progress ?? _progress;
+    }
+    _maxProgress = maxProgress ?? _maxProgress;
+    _padding = padding ?? _padding;
+    _spacing = spacing ?? _spacing;
+    _indicatorSize = indicatorSize ?? _indicatorSize;
+    _progressWidget = progressWidget ?? _progressWidget;
+    _messageStyle = messageTextStyle ?? _messageStyle;
+    _progressTextStyle = progressTextStyle ?? _progressTextStyle;
   }
 
   static KeicyProgressDialog of(
     BuildContext context, {
-    message: "Please wait.....",
-    width: 100.0,
-    borderRadius: 5.0,
-    backgroundColor: Colors.white,
-    indicatorSize: 30.0,
+    bool isDismissible,
+    bool showLogs,
+    ProgressDialogType type,
+    Layout layout,
+    Color backgroundColor,
+    double borderRadius,
+    double elevation,
+    Curve insetAnimCurve,
+    double width,
+    double height,
+    String message,
+    double progress,
+    double maxProgress,
+    EdgeInsetsGeometry padding,
+    double spacing,
+    double indicatorSize,
+    Widget progressWidget,
+    TextStyle progressTextStyle,
+    TextStyle messageTextStyle,
   }) {
     return KeicyProgressDialog(
       context,
+      isDismissible: isDismissible,
+      showLogs: showLogs,
+      type: type,
+      layout: layout,
+      backgroundColor: backgroundColor,
+      borderRadius: borderRadius,
+      elevation: elevation,
+      insetAnimCurve: insetAnimCurve,
       message: message,
       width: width,
-      borderRadius: borderRadius,
-      backgroundColor: backgroundColor,
+      height: height,
+      progress: progress,
+      maxProgress: maxProgress,
+      padding: padding,
+      spacing: spacing,
       indicatorSize: indicatorSize,
+      progressWidget: progressWidget,
+      progressTextStyle: progressTextStyle,
+      messageTextStyle: messageTextStyle,
     );
   }
 
-  Future<void> show() async {
-    return await dlg.show();
-  }
-
-  Future<void> hide() async {
-    return await dlg.hide();
-  }
-
-  bool isShowing() {
-    return dlg.isShowing();
-  }
-}
-
-enum ProgressDialogType { Normal, Download }
-
-String _dialogMessage = "Loading...";
-double _progress = 0.0, _maxProgress = 100.0;
-double _dialogWidth = 100;
-double _dialogHeight = 30;
-double _dialogIndicatorSize;
-
-bool _isShowing = false;
-BuildContext _context, _dismissingContext;
-ProgressDialogType _progressDialogType;
-bool _barrierDismissible = true, _showLogs = false;
-
-TextStyle _progressTextStyle = TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w400),
-    _messageStyle = TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.w600);
-
-double _dialogElevation = 8.0, _borderRadius = 8.0;
-Color _backgroundColor = Colors.white;
-Curve _insetAnimCurve = Curves.easeInOut;
-
-Widget _progressWidget = Image.asset(
-  'assets/double_ring_loading_io.gif',
-  package: 'progress_dialog',
-);
-
-class ProgressDialog {
-  _Body _dialog;
-
-  ProgressDialog(BuildContext context, {ProgressDialogType type, bool isDismissible, bool showLogs}) {
-    _context = context;
-    _progressDialogType = type ?? ProgressDialogType.Normal;
-    _barrierDismissible = isDismissible ?? true;
-    _showLogs = showLogs ?? false;
-  }
-
-  void style(
-      {double progress,
-      double maxProgress,
-      String message,
-      double width,
-      double height,
-      double indicatorSize,
-      Widget progressWidget,
-      Color backgroundColor,
-      TextStyle progressTextStyle,
-      TextStyle messageTextStyle,
-      double elevation,
-      double borderRadius,
-      Curve insetAnimCurve}) {
-    if (_isShowing) return;
-    if (_progressDialogType == ProgressDialogType.Download) {
-      _progress = progress ?? _progress;
-    }
-
-    _dialogMessage = message ?? _dialogMessage;
-    _dialogWidth = width ?? _dialogWidth;
-    _dialogHeight = height ?? _dialogHeight;
-    _dialogIndicatorSize = indicatorSize ?? _dialogHeight;
-    _maxProgress = maxProgress ?? _maxProgress;
-    _progressWidget = progressWidget ?? _progressWidget;
-    _backgroundColor = backgroundColor ?? _backgroundColor;
-    _messageStyle = messageTextStyle ?? _messageStyle;
-    _progressTextStyle = progressTextStyle ?? _progressTextStyle;
-    _dialogElevation = elevation ?? _dialogElevation;
-    _borderRadius = borderRadius ?? _borderRadius;
-    _insetAnimCurve = insetAnimCurve ?? _insetAnimCurve;
-  }
-
-  void update({double progress, double maxProgress, String message, Widget progressWidget, TextStyle progressTextStyle, TextStyle messageTextStyle}) {
+  void update({
+    double progress,
+    double maxProgress,
+    String message,
+    Widget progressWidget,
+    TextStyle progressTextStyle,
+    TextStyle messageTextStyle,
+  }) {
     if (_progressDialogType == ProgressDialogType.Download) {
       _progress = progress ?? _progress;
     }
@@ -197,12 +200,13 @@ class ProgressDialog {
             return WillPopScope(
               onWillPop: () async => _barrierDismissible,
               child: Dialog(
-                  backgroundColor: _backgroundColor,
-                  insetAnimationCurve: _insetAnimCurve,
-                  insetAnimationDuration: Duration(milliseconds: 100),
-                  elevation: _dialogElevation,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
-                  child: _dialog),
+                backgroundColor: _backgroundColor,
+                insetAnimationCurve: _insetAnimCurve,
+                insetAnimationDuration: Duration(milliseconds: 100),
+                elevation: _dialogElevation,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
+                child: _dialog,
+              ),
             );
           },
         );
@@ -250,36 +254,60 @@ class _BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: _dialogWidth,
-      height: _dialogHeight,
-      child: Row(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-        const SizedBox(width: 20.0),
-        SizedBox(
-          width: _dialogIndicatorSize,
-          height: _dialogIndicatorSize,
-          child: _progressWidget,
+    if (_layout == Layout.Row) {
+      return Container(
+        width: _width,
+        height: _height,
+        padding: _padding,
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              _progressWidget,
+              (_dialogMessage == "") ? SizedBox() : SizedBox(width: _spacing),
+              (_dialogMessage == "")
+                  ? SizedBox()
+                  : (_progressDialogType == ProgressDialogType.Normal)
+                      ? Text(_dialogMessage, textAlign: TextAlign.justify, style: _messageStyle)
+                      : Column(
+                          children: <Widget>[
+                            Text(_dialogMessage, style: _messageStyle),
+                            SizedBox(height: 15),
+                            Text("$_progress/$_maxProgress", style: _progressTextStyle),
+                          ],
+                        ),
+            ],
+          ),
         ),
-        const SizedBox(width: 15.0),
-        Expanded(
-          child: _progressDialogType == ProgressDialogType.Normal
-              ? Text(_dialogMessage, textAlign: TextAlign.justify, style: _messageStyle)
-              : Stack(
-                  children: <Widget>[
-                    Positioned(
-                      child: Text(_dialogMessage, style: _messageStyle),
-                      top: 30.0,
-                    ),
-                    Positioned(
-                      child: Text("$_progress/$_maxProgress", style: _progressTextStyle),
-                      bottom: 10.0,
-                      right: 10.0,
-                    ),
-                  ],
-                ),
+      );
+    } else {
+      return Container(
+        width: _width,
+        height: _height,
+        padding: _padding,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              _progressWidget,
+              (_dialogMessage == "") ? SizedBox() : SizedBox(width: _spacing),
+              (_dialogMessage == "")
+                  ? SizedBox()
+                  : _progressDialogType == ProgressDialogType.Normal
+                      ? Text(_dialogMessage, textAlign: TextAlign.justify, style: _messageStyle)
+                      : Column(
+                          children: <Widget>[
+                            Text(_dialogMessage, style: _messageStyle),
+                            SizedBox(height: 15),
+                            Text("$_progress/$_maxProgress", style: _progressTextStyle),
+                          ],
+                        ),
+            ],
+          ),
         ),
-        const SizedBox(width: 10.0)
-      ]),
-    );
+      );
+    }
   }
 }
