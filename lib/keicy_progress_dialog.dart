@@ -3,60 +3,69 @@ library keicy_progress_dialog;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum ProgressDialogType { Normal, Download }
-enum Layout { Row, Column }
+enum ProgressDialogType { normal, download }
+enum Layout { row, column }
 
-BuildContext _context, _dismissingContext;
+BuildContext? _context, _dismissingContext;
 bool _barrierDismissible = true, _showLogs = false;
-ProgressDialogType _progressDialogType = ProgressDialogType.Normal;
-Layout _layout = Layout.Row;
+ProgressDialogType _progressDialogType = ProgressDialogType.normal;
+Layout _layout = Layout.row;
 Color _backgroundColor = Colors.white;
 double _dialogElevation = 8.0, _borderRadius = 8.0;
 Curve _insetAnimCurve = Curves.easeInOut;
 double _width = 100;
 double _height = 80;
-String _dialogMessage = "Please wait .....";
 double _progress = 0.0;
 double _maxProgress = 100.0;
-EdgeInsetsGeometry _padding = EdgeInsets.all(15);
+EdgeInsetsGeometry _padding = const EdgeInsets.all(15);
 double _spacing = 20.0;
 double _indicatorSize = 20;
-Widget _progressWidget = Container(
+Widget _progressWidget = SizedBox(
   width: _indicatorSize,
   height: _indicatorSize,
   child: CupertinoActivityIndicator(
     radius: _indicatorSize / 2,
   ),
 );
-TextStyle _progressTextStyle = TextStyle(color: Colors.black, fontSize: 15.0, fontWeight: FontWeight.w400);
-TextStyle _messageStyle = TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.w600);
+TextStyle _progressTextStyle = const TextStyle(
+  color: Colors.black,
+  fontSize: 15.0,
+  fontWeight: FontWeight.w400,
+);
+TextStyle _messageStyle = const TextStyle(
+  color: Colors.black,
+  fontSize: 20.0,
+  fontWeight: FontWeight.w600,
+);
 
 bool _isShowing = false;
 
 class KeicyProgressDialog {
-  _Body _dialog;
+  _Body? _dialog;
+
+  String _dialogMessage = "Please wait .....";
 
   KeicyProgressDialog(
-    BuildContext context, {
-    bool isDismissible,
-    bool showLogs,
-    ProgressDialogType type,
-    Layout layout,
-    Color backgroundColor,
-    double borderRadius,
-    double elevation,
-    Curve insetAnimCurve,
-    double width,
-    double height,
-    String message,
-    double progress,
-    double maxProgress,
-    EdgeInsetsGeometry padding,
-    double spacing,
-    double indicatorSize,
-    Widget progressWidget,
-    TextStyle progressTextStyle,
-    TextStyle messageTextStyle,
+    BuildContext? context, {
+    bool? isDismissible,
+    bool? showLogs,
+    ProgressDialogType? type,
+    Layout? layout,
+    Color? backgroundColor,
+    double? borderRadius,
+    double? elevation,
+    Curve? insetAnimCurve,
+    double? width,
+    double? height,
+    String? message,
+    double? progress,
+    double? maxProgress,
+    EdgeInsetsGeometry? padding,
+    double? spacing,
+    double? indicatorSize,
+    Widget? progressWidget,
+    TextStyle? progressTextStyle,
+    TextStyle? messageTextStyle,
   }) {
     _context = context;
     _barrierDismissible = isDismissible ?? true;
@@ -73,7 +82,7 @@ class KeicyProgressDialog {
     _dialogMessage = message ?? _dialogMessage;
     _width = width ?? _width;
     _height = height ?? _height;
-    if (_progressDialogType == ProgressDialogType.Download) {
+    if (_progressDialogType == ProgressDialogType.download) {
       _progress = progress ?? _progress;
     }
     _maxProgress = maxProgress ?? _maxProgress;
@@ -86,26 +95,26 @@ class KeicyProgressDialog {
   }
 
   static KeicyProgressDialog of(
-    BuildContext context, {
-    bool isDismissible,
-    bool showLogs,
-    ProgressDialogType type,
-    Layout layout,
-    Color backgroundColor,
-    double borderRadius,
-    double elevation,
-    Curve insetAnimCurve,
-    double width,
-    double height,
-    String message,
-    double progress,
-    double maxProgress,
-    EdgeInsetsGeometry padding,
-    double spacing,
-    double indicatorSize,
-    Widget progressWidget,
-    TextStyle progressTextStyle,
-    TextStyle messageTextStyle,
+    BuildContext? context, {
+    bool? isDismissible,
+    bool? showLogs,
+    ProgressDialogType? type,
+    Layout? layout,
+    Color? backgroundColor,
+    double? borderRadius,
+    double? elevation,
+    Curve? insetAnimCurve,
+    double? width,
+    double? height,
+    String? message,
+    double? progress,
+    double? maxProgress,
+    EdgeInsetsGeometry? padding,
+    double? spacing,
+    double? indicatorSize,
+    Widget? progressWidget,
+    TextStyle? progressTextStyle,
+    TextStyle? messageTextStyle,
   }) {
     return KeicyProgressDialog(
       context,
@@ -132,14 +141,14 @@ class KeicyProgressDialog {
   }
 
   void update({
-    double progress,
-    double maxProgress,
-    String message,
-    Widget progressWidget,
-    TextStyle progressTextStyle,
-    TextStyle messageTextStyle,
+    double? progress,
+    double? maxProgress,
+    String? message,
+    Widget? progressWidget,
+    TextStyle? progressTextStyle,
+    TextStyle? messageTextStyle,
   }) {
-    if (_progressDialogType == ProgressDialogType.Download) {
+    if (_progressDialogType == ProgressDialogType.download) {
       _progress = progress ?? _progress;
     }
 
@@ -149,7 +158,7 @@ class KeicyProgressDialog {
     _messageStyle = messageTextStyle ?? _messageStyle;
     _progressTextStyle = progressTextStyle ?? _progressTextStyle;
 
-    if (_isShowing) _dialog.update();
+    if (_isShowing) _dialog!.update();
   }
 
   bool isShowing() {
@@ -160,8 +169,8 @@ class KeicyProgressDialog {
     if (_isShowing) {
       try {
         _isShowing = false;
-        if (Navigator.of(_dismissingContext).canPop()) {
-          Navigator.of(_dismissingContext).pop();
+        if (Navigator.of(_dismissingContext!).canPop()) {
+          Navigator.of(_dismissingContext!).pop();
           if (_showLogs) debugPrint('ProgressDialog dismissed');
         } else {
           if (_showLogs) debugPrint('Cant pop ProgressDialog');
@@ -176,7 +185,7 @@ class KeicyProgressDialog {
     if (_isShowing) {
       try {
         _isShowing = false;
-        Navigator.of(_dismissingContext).pop(true);
+        Navigator.of(_dismissingContext!).pop(true);
         if (_showLogs) debugPrint('ProgressDialog dismissed');
         return Future.value(true);
       } catch (_) {
@@ -191,9 +200,9 @@ class KeicyProgressDialog {
   Future<bool> show() async {
     if (!_isShowing) {
       try {
-        _dialog = new _Body();
+        _dialog = _Body(message: _dialogMessage);
         showDialog<dynamic>(
-          context: _context,
+          context: _context!,
           barrierDismissible: false,
           builder: (BuildContext context) {
             _dismissingContext = context;
@@ -202,7 +211,7 @@ class KeicyProgressDialog {
               child: Dialog(
                 backgroundColor: _backgroundColor,
                 insetAnimationCurve: _insetAnimCurve,
-                insetAnimationDuration: Duration(milliseconds: 100),
+                insetAnimationDuration: const Duration(milliseconds: 100),
                 elevation: _dialogElevation,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
                 child: _dialog,
@@ -212,7 +221,7 @@ class KeicyProgressDialog {
         );
         // Delaying the function for 200 milliseconds
         // [Default transitionDuration of DialogRoute]
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 200));
         if (_showLogs) debugPrint('ProgressDialog shown');
         _isShowing = true;
         return true;
@@ -228,7 +237,11 @@ class KeicyProgressDialog {
 
 // ignore: must_be_immutable
 class _Body extends StatefulWidget {
-  _BodyState _dialog = _BodyState();
+  String? message;
+
+  _Body({this.message});
+
+  final _BodyState _dialog = _BodyState();
 
   update() {
     _dialog.update();
@@ -254,7 +267,7 @@ class _BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    if (_layout == Layout.Row) {
+    if (_layout == Layout.row) {
       return Container(
         width: _width,
         height: _height,
@@ -265,15 +278,15 @@ class _BodyState extends State<_Body> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               _progressWidget,
-              (_dialogMessage == "") ? SizedBox() : SizedBox(width: _spacing),
-              (_dialogMessage == "")
-                  ? SizedBox()
-                  : (_progressDialogType == ProgressDialogType.Normal)
-                      ? Text(_dialogMessage, textAlign: TextAlign.justify, style: _messageStyle)
+              (widget.message! == "") ? const SizedBox() : SizedBox(width: _spacing),
+              (widget.message! == "")
+                  ? const SizedBox()
+                  : (_progressDialogType == ProgressDialogType.normal)
+                      ? Text(widget.message!, textAlign: TextAlign.justify, style: _messageStyle)
                       : Column(
                           children: <Widget>[
-                            Text(_dialogMessage, style: _messageStyle),
-                            SizedBox(height: 15),
+                            Text(widget.message!, style: _messageStyle),
+                            const SizedBox(height: 15),
                             Text("$_progress/$_maxProgress", style: _progressTextStyle),
                           ],
                         ),
@@ -292,15 +305,15 @@ class _BodyState extends State<_Body> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               _progressWidget,
-              (_dialogMessage == "") ? SizedBox() : SizedBox(width: _spacing),
-              (_dialogMessage == "")
-                  ? SizedBox()
-                  : _progressDialogType == ProgressDialogType.Normal
-                      ? Text(_dialogMessage, textAlign: TextAlign.justify, style: _messageStyle)
+              (widget.message! == "") ? const SizedBox() : SizedBox(width: _spacing),
+              (widget.message! == "")
+                  ? const SizedBox()
+                  : _progressDialogType == ProgressDialogType.normal
+                      ? Text(widget.message!, textAlign: TextAlign.justify, style: _messageStyle)
                       : Column(
                           children: <Widget>[
-                            Text(_dialogMessage, style: _messageStyle),
-                            SizedBox(height: 15),
+                            Text(widget.message!, style: _messageStyle),
+                            const SizedBox(height: 15),
                             Text("$_progress/$_maxProgress", style: _progressTextStyle),
                           ],
                         ),
