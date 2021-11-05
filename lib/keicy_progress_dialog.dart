@@ -2,12 +2,13 @@ library keicy_progress_dialog;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
-enum ProgressDialogType { normal, download }
+enum ProgressDialogType { normal, download, spin }
 enum Layout { row, column }
 
 BuildContext? _context, _dismissingContext;
-bool _barrierDismissible = true, _showLogs = false;
+bool _barrierDismissible = true;
 ProgressDialogType _progressDialogType = ProgressDialogType.normal;
 Layout _layout = Layout.row;
 Color _backgroundColor = Colors.white;
@@ -37,8 +38,8 @@ TextStyle _messageStyle = const TextStyle(
   fontSize: 20.0,
   fontWeight: FontWeight.w600,
 );
-
 bool _isShowing = false;
+Color? _spinColor;
 
 class KeicyProgressDialog {
   _Body? _dialog;
@@ -48,7 +49,6 @@ class KeicyProgressDialog {
   KeicyProgressDialog(
     BuildContext? context, {
     bool? isDismissible,
-    bool? showLogs,
     ProgressDialogType? type,
     Layout? layout,
     Color? backgroundColor,
@@ -66,10 +66,10 @@ class KeicyProgressDialog {
     Widget? progressWidget,
     TextStyle? progressTextStyle,
     TextStyle? messageTextStyle,
+    Color? spinColor,
   }) {
     _context = context;
     _barrierDismissible = isDismissible ?? true;
-    _showLogs = showLogs ?? false;
     _progressDialogType = type ?? _progressDialogType;
     _layout = layout ?? _layout;
 
@@ -92,12 +92,12 @@ class KeicyProgressDialog {
     _progressWidget = progressWidget ?? _progressWidget;
     _messageStyle = messageTextStyle ?? _messageStyle;
     _progressTextStyle = progressTextStyle ?? _progressTextStyle;
+    _spinColor = spinColor;
   }
 
   static KeicyProgressDialog of(
     BuildContext? context, {
     bool? isDismissible,
-    bool? showLogs,
     ProgressDialogType? type,
     Layout? layout,
     Color? backgroundColor,
@@ -115,11 +115,11 @@ class KeicyProgressDialog {
     Widget? progressWidget,
     TextStyle? progressTextStyle,
     TextStyle? messageTextStyle,
+    Color? spinColor,
   }) {
     return KeicyProgressDialog(
       context,
       isDismissible: isDismissible,
-      showLogs: showLogs,
       type: type,
       layout: layout,
       backgroundColor: backgroundColor,
@@ -137,6 +137,7 @@ class KeicyProgressDialog {
       progressWidget: progressWidget,
       progressTextStyle: progressTextStyle,
       messageTextStyle: messageTextStyle,
+      spinColor: spinColor,
     );
   }
 
@@ -171,13 +172,8 @@ class KeicyProgressDialog {
         _isShowing = false;
         if (Navigator.of(_dismissingContext!).canPop()) {
           Navigator.of(_dismissingContext!).pop();
-          if (_showLogs) debugPrint('ProgressDialog dismissed');
-        } else {
-          if (_showLogs) debugPrint('Cant pop ProgressDialog');
         }
       } catch (_) {}
-    } else {
-      if (_showLogs) debugPrint('ProgressDialog already dismissed');
     }
   }
 
@@ -186,13 +182,11 @@ class KeicyProgressDialog {
       try {
         _isShowing = false;
         Navigator.of(_dismissingContext!).pop(true);
-        if (_showLogs) debugPrint('ProgressDialog dismissed');
         return Future.value(true);
       } catch (_) {
         return Future.value(false);
       }
     } else {
-      if (_showLogs) debugPrint('ProgressDialog already dismissed');
       return Future.value(false);
     }
   }
@@ -214,7 +208,7 @@ class KeicyProgressDialog {
                 insetAnimationDuration: const Duration(milliseconds: 100),
                 elevation: _dialogElevation,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(_borderRadius))),
-                child: _dialog,
+                child: (_progressDialogType == ProgressDialogType.spin) ? _CircularSpin() : _dialog,
               ),
             );
           },
@@ -222,14 +216,12 @@ class KeicyProgressDialog {
         // Delaying the function for 200 milliseconds
         // [Default transitionDuration of DialogRoute]
         await Future.delayed(const Duration(milliseconds: 200));
-        if (_showLogs) debugPrint('ProgressDialog shown');
         _isShowing = true;
         return true;
       } catch (_) {
         return false;
       }
     } else {
-      if (_showLogs) debugPrint("ProgressDialog already shown/showing");
       return false;
     }
   }
@@ -261,7 +253,6 @@ class _BodyState extends State<_Body> {
   @override
   void dispose() {
     _isShowing = false;
-    if (_showLogs) debugPrint('ProgressDialog dismissed by back button');
     super.dispose();
   }
 
@@ -322,5 +313,38 @@ class _BodyState extends State<_Body> {
         ),
       );
     }
+  }
+}
+
+class _CircularSpin extends StatefulWidget {
+  const _CircularSpin({Key? key}) : super(key: key);
+
+  @override
+  __CircularSpinState createState() => __CircularSpinState();
+}
+
+class __CircularSpinState extends State<_CircularSpin> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: _width,
+      height: _height,
+      padding: _padding,
+      child: Center(
+        child: Container(
+          width: _width,
+          height: _height,
+          padding: _padding,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: SpinKitFadingCircle(
+            color: _spinColor,
+            size: _indicatorSize,
+          ),
+        ),
+      ),
+    );
   }
 }
