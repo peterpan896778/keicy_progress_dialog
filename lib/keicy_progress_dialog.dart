@@ -201,7 +201,10 @@ class KeicyProgressDialog {
           builder: (BuildContext context) {
             _dismissingContext = context;
             return WillPopScope(
-              onWillPop: () async => _barrierDismissible,
+              onWillPop: () async {
+                _isShowing = false;
+                return _barrierDismissible;
+              },
               child: Dialog(
                 backgroundColor: _backgroundColor,
                 insetAnimationCurve: _insetAnimCurve,
